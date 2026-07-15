@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaiXiu Online - Cờ bạc xúc xắc</title>
+    <style>
+        /* ========== TOÀN BỘ GIAO DIỆN ========== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(145deg, #1a2a3a, #0f1a24);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: #1e2f3f;
+            border-radius: 40px;
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 1px solid #3a5a7a;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffd966;
+            text-shadow: 0 0 15px #ff9900;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .balance {
+            background: #0d1a26;
+            padding: 12px 20px;
+            border-radius: 40px;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #7be07b;
+            border: 1px solid #3a6a3a;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 10px rgba(0,255,0,0.2);
+        }
+        .balance span {
+            font-weight: bold;
+            color: #ffd966;
+        }
+        .dice-area {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0 30px;
+        }
+        .dice {
+            width: 90px;
+            height: 90px;
+            background: #ffffff;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.8rem;
+            font-weight: bold;
+            color: #1a2a3a;
+            box-shadow: 0 10px 0 #6b8a9a, 0 6px 20px rgba(0,0,0,0.6);
+            transition: 0.2s;
+            user-select: none;
+        }
+        .dice.rolling {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg) scale(1.05); }
+            50% { transform: rotate(-10deg) scale(0.95); }
+            75% { transform: rotate(8deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .result-display {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 20px;
+            background: #0d1a26;
+            color: #f0f0f0;
+            margin-bottom: 25px;
+            border: 1px solid #3a5a7a;
+        }
+        .result-display .win { color: #7be07b; }
+        .result-display .lose { color: #ff6b6b; }
+        .bet-section {
+            background: #15242f;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #2a4a5a;
+        }
+        .bet-section label {
+            color: #b0d0e0;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .bet-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .bet-row input[type="number"] {
+            flex: 2;
+            min-width: 120px;
+            padding: 12px 16px;
+            border-radius: 30px;
+            border: none;
+            background: #0d1a26;
+            color: #fff;
+            font-size: 1.2rem;
+            border: 1px solid #3a5a7a;
+        }
+        .bet-row select {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 30px;
+            background: #0d1a26;
+            color: #fff;
+            font-size: 1.2rem;
+            border: 1px solid #3a5a7a;
+            cursor: pointer;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 0 #0a1a22;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #0a1a22; }
+        .btn-tai { background: #4caf50; }
+        .btn-tai:hover { background: #66bb6a; }
+        .btn-xiu { background: #f44336; }
+        .btn-xiu:hover { background: #ff6659; }
+        .btn-history { background: #3f51b5; flex: 0.5; }
+        .btn-history:hover { background: #5c6bc0; }
+        .btn-reset { background: #9e9e9e; flex: 0.5; }
+        .btn-reset:hover { background: #bdbdbd; }
+        .history-box {
+            background: #0d1a26;
+            border-radius: 20px;
+            padding: 15px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #2a4a5a;
+            margin-top: 15px;
+        }
+        .history-box p {
+            color: #b0d0e0;
+            font-size: 1rem;
+            margin: 4px 0;
+            padding: 4px 10px;
+            border-radius: 10px;
+            background: #1a2f3f;
+        }
+        .history-box .win-text { color: #7be07b; }
+        .history-box .lose-text { color: #ff6b6b; }
+        .footer-note {
+            color: #6a8a9a;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            border-top: 1px solid #2a4a5a;
+            padding-top: 12px;
+        }
+        /* scrollbar */
+        .history-box::-webkit-scrollbar { width: 6px; }
+        .history-box::-webkit-scrollbar-track { background: #0d1a26; }
+        .history-box::-webkit-scrollbar-thumb { background: #3a5a7a; border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎲 Tài Xỉu</h1>
+    <div class="balance">💰 Số dư: <span id="balanceDisplay">1000</span> xu</div>
+
+    <div class="dice-area">
+        <div class="dice" id="dice1">⚀</div>
+        <div class="dice" id="dice2">⚀</div>
+        <div class="dice" id="dice3">⚀</div>
+    </div>
+
+    <div class="result-display" id="resultDisplay">Chọn cửa và đặt cược</div>
+
+    <div class="bet-section">
+        <div class="bet-row">
+            <label>💵 Tiền cược</label>
+            <input type="number" id="betAmount" value="50" min="1" step="1" />
+            <select id="betChoice">
+                <option value="tai">Tài (Tổng 11-17)</option>
+                <option value="xiu">Xỉu (Tổng 4-10)</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-tai" id="btnTai">Tài</button>
+            <button class="btn btn-xiu" id="btnXiu">Xỉu</button>
+            <button class="btn btn-history" id="btnClearHistory">🗑️ Xóa lịch</button>
+            <button class="btn btn-reset" id="btnReset">🔄 Reset game</button>
+        </div>
+    </div>
+
+    <div class="history-box" id="historyBox">
+        <p style="color:#6a8a9a; text-align:center;">Lịch sử cược sẽ hiển thị tại đây</p>
+    </div>
+    <div class="footer-note">Chơi giải trí – không đặt cược thật.</div>
+</div>
+
+<script>
+    // =============================================================
+    // 1. DỮ LIỆU VÀ TRẠNG THÁI
+    // =============================================================
+    let balance = 1000;                       // Số dư hiện tại
+    let history = [];                        // Lưu các ván chơi: { bet, choice, result, win, amount, total }
+    const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅']; // Unicode xúc xắc
+
+    // DOM elements
+    const diceEls = [
+        document.getElementById('dice1'),
+        document.getElementById('dice2'),
+        document.getElementById('dice3')
+    ];
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const resultDisplay = document.getElementById('resultDisplay');
+    const historyBox = document.getElementById('historyBox');
+    const betAmountInput = document.getElementById('betAmount');
+    const betChoiceSelect = document.getElementById('betChoice');
+
+    // =============================================================
+    // 2. HÀM TIỆN ÍCH
+    // =============================================================
+    function updateBalanceUI() {
+        balanceDisplay.textContent = balance;
+        if (balance <= 0) {
+            balanceDisplay.style.color = '#ff6b6b';
+        } else {
+            balanceDisplay.style.color = '#ffd966';
+        }
+    }
+
+    // Cập nhật lịch sử
+    function renderHistory() {
+        if (history.length === 0) {
+            historyBox.innerHTML = '<p style="color:#6a8a9a; text-align:center;">Lịch sử cược sẽ hiển thị tại đây</p>';
+            return;
+        }
+        // Hiển thị 20 ván gần nhất (đảo ngược để mới nhất lên đầu)
+        const items = history.slice(-20).reverse();
+        let html = '';
+        items.forEach(item => {
+            const resultText = item.win ? 'THẮNG' : 'THUA';
+            const cls = item.win ? 'win-text' : 'lose-text';
+            const sign = item.win ? '+' : '-';
+            html += `<p>💰 ${item.bet} xu | ${item.choice.toUpperCase()} → ${item.result} | ${resultText} ${sign}${Math.abs(item.amount)} xu (tổng: ${item.total})</p>`;
+        });
+        historyBox.innerHTML = html;
+        // Tự động cuộn xuống dưới (mới nhất)
+        historyBox.scrollTop = historyBox.scrollHeight;
+    }
+
+    // Quay xúc xắc (ngẫu nhiên 3 viên)
+    function rollDice() {
+        const values = [];
+        for (let i = 0; i < 3; i++) {
+            const val = Math.floor(Math.random() * 6) + 1; // 1..6
+            values.push(val);
+        }
+        return values;
+    }
+
+    // Hiển thị xúc xắc bằng ký tự Unicode
+    function displayDice(values) {
+        for (let i = 0; i < 3; i++) {
+            diceEls[i].textContent = DICE_FACES[values[i] - 1];
+        }
+    }
+
+    // Thêm hiệu ứng lắc
+    function animateDice() {
+        diceEls.forEach(d => d.classList.add('rolling'));
+        setTimeout(() => {
+            diceEls.forEach(d => d.classList.remove('rolling'));
+        }, 500);
+    }
+
+    // Xác định Tài/Xỉu dựa trên tổng
+    function getResult(sum) {
+        if (sum >= 11 && sum <= 17) return 'tai';
+        if (sum >= 4 && sum <= 10) return 'xiu';
+        return 'unknown'; // Trường hợp 3 hoặc 18 (hiếm)
+    }
+
+    // =============================================================
+    // 3. HÀM XỬ LÝ CƯỢC CHÍNH
+    // =============================================================
+    function placeBet(choice) {
+        // Kiểm tra số dư
+        if (balance <= 0) {
+            resultDisplay.innerHTML = '⚠️ Bạn đã hết tiền! Nhấn "Reset game" để chơi lại.';
+            return;
+        }
+
+        // Lấy số tiền cược
+        let amount = parseInt(betAmountInput.value, 10);
+        if (isNaN(amount) || amount < 1) {
+            resultDisplay.innerHTML = '⚠️ Vui lòng nhập số tiền cược hợp lệ (>=1).';
+            return;
+        }
+        if (amount > balance) {
+            resultDisplay.innerHTML = `⚠️ Bạn chỉ có ${balance} xu, không đủ cược ${amount} xu.`;
+            return;
+        }
+
+        // Ẩn kết quả cũ, hiệu ứng xúc xắc
+        animateDice();
+
+        // Quay xúc xắc
+        const diceValues = rollDice();
+        const sum = diceValues.reduce((a,b) => a + b, 0);
+        const result = getResult(sum);
+
+        // Xác định thắng/thua
+        let win = false;
+        if (choice === result) {
+            win = true;
+        }
+
+        // Cập nhật số dư
+        let delta = 0;
+        if (win) {
+            delta = amount; // Thắng được nhân đôi (cược + thưởng = 2x)
+            balance += delta;
+        } else {
+            delta = -amount;
+            balance += delta;
+        }
+
+        // Ghi vào lịch sử
+        const historyEntry = {
+            bet: amount,
+            choice: choice,
+            result: result,
+            win: win,
+            amount: delta,
+            total: balance
+        };
+        history.push(historyEntry);
+
+        // Hiển thị xúc xắc
+        displayDice(diceValues);
+
+        // Cập nhật UI
+        updateBalanceUI();
+        renderHistory();
+
+        // Hiển thị kết quả
+        const sumText = `Tổng: ${sum} (${diceValues.join(' + ')})`;
+        const choiceText = choice === 'tai' ? 'Tài' : 'Xỉu';
+        const resultText = result === 'tai' ? 'Tài' : 'Xỉu';
+        let msg = `Bạn chọn ${choiceText} – Kết quả: ${resultText} | ${sumText}`;
+        if (win) {
+            resultDisplay.innerHTML = `🎉 <span class="win">${msg} – BẠN THẮNG +${amount} xu!</span>`;
+        } else {
+            resultDisplay.innerHTML = `😞 <span class="lose">${msg} – BẠN THUA -${amount} xu</span>`;
+        }
+
+        // Tự động gợi ý cược mới nếu thua hết
+        if (balance <= 0) {
+            resultDisplay.innerHTML += '<br>⚠️ Bạn đã hết tiền. Nhấn "Reset game" để chơi tiếp.';
+        }
+    }
+
+    // =============================================================
+    // 4. RESET GAME
+    // =============================================================
+    function resetGame() {
+        balance = 1000;
+        history = [];
+        updateBalanceUI();
+        renderHistory();
+        resultDisplay.innerHTML = '🔄 Game đã được reset. Chúc bạn may mắn!';
+        // Đặt lại xúc xắc mặc định
+        displayDice([1,1,1]);
+        betAmountInput.value = 50;
+    }
+
+    // =============================================================
+    // 5. GÁN SỰ KIỆN CHO CÁC NÚT
+    // =============================================================
+    document.getElementById('btnTai').addEventListener('click', function() {
+        placeBet('tai');
+    });
+    document.getElementById('btnXiu').addEventListener('click', function() {
+        placeBet('xiu');
+    });
+    document.getElementById('btnReset').addEventListener('click', resetGame);
+    document.getElementById('btnClearHistory').addEventListener('click', function() {
+        history = [];
+        renderHistory();
+        resultDisplay.innerHTML = '🗑️ Lịch sử đã được xóa.';
+    });
+
+    // Nhấn Enter trên ô cược cũng kích hoạt cược theo lựa chọn hiện tại
+    betAmountInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const choice = betChoiceSelect.value;
+            placeBet(choice);
+        }
+    });
+
+    // =============================================================
+    // 6. KHỞI TẠO LẦN ĐẦU
+    // =============================================================
+    // Hiển thị xúc xắc mặc định (1,1,1)
+    displayDice([1,1,1]);
+    updateBalanceUI();
+    renderHistory();
+    resultDisplay.innerHTML = '🎲 Hãy chọn Tài hoặc Xỉu và đặt cược!';
+</script>
+</body>
+</html>
